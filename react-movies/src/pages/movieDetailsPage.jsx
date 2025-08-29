@@ -1,0 +1,47 @@
+import React from "react";
+import { useParams } from "react-router";
+import MovieDetails from "../components/movieDetails/";
+import PageTemplate from "../components/templateMoviePage";
+import { getMovie } from "../api/tmdb-api";
+import { useQuery } from "@tanstack/react-query";
+import Spinner from "../components/spinner";
+
+import { Link } from "react-router";            // ADDED: Link for navigation
+import Button from "@mui/material/Button";      // ADDED: MUI Button for the CTA
+
+const MoviePage = () => {
+  const { id } = useParams();
+
+  const { data: movie, error, isPending, isError } = useQuery({
+    queryKey: ["movie", { id: id }],
+    queryFn: getMovie,
+  });
+
+  if (isPending) {
+    return <Spinner />;
+  }
+
+  if (isError) {
+    return <h1>{error.message}</h1>;
+  }
+
+  return (
+    <>
+      {movie ? (
+        <PageTemplate movie={movie}>
+          <MovieDetails movie={movie} />
+       
+          <Link to={`/movies/${movie.id}/recommendations`}>
+            <Button variant="outlined" size="medium" color="primary" sx={{ mt: 2 }}>
+              Recommendations
+            </Button>
+          </Link>
+        </PageTemplate>
+      ) : (
+        <p>Waiting for movie details</p>
+      )}
+    </>
+  );
+};
+
+export default MoviePage;
